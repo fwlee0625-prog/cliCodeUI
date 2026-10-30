@@ -1,0 +1,30 @@
+.composer-reasoning-range::-webkit-slider-runnable-track {
+  height: 24px;
+  background: transparent;
+}
+
+.composer-reasoning-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 28px;
+  height: 28px;
+  margin-top: -2px;
+  border: 1px solid rgb(0 0 0 / 10%);
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 10%);
+}
+
+.composer-reasoning-range::-moz-range-track {
+  height: 24px;
+  background: transparent;
+}
+
+.composer-reasoning-range::-moz-range-thumb {
+  box-sizing: border-box;
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgb(0 0 0 / 10%);
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 10%);
+}

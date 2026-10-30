@@ -1,0 +1,72 @@
+.scroll-area-viewport {
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.scroll-area-viewport::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.scroll-area-bar {
+  position: absolute;
+  z-index: 10;
+  border-radius: 9999px;
+  opacity: 0;
+  pointer-events: none;
+  touch-action: none;
+  user-select: none;
+  transition: opacity 180ms ease;
+}
+
+.scroll-area-bar[data-visible='true'],
+.scroll-area-bar:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.scroll-area-bar:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: -1px;
+}
+
+.scroll-area-bar-vertical {
+  top: 2px;
+  right: 0;
+  width: 10px;
+}
+
+.scroll-area-bar-horizontal {
+  bottom: 0;
+  left: 2px;
+  height: 10px;
+}
+
+.scroll-area-thumb {
+  position: absolute;
+  border-radius: inherit;
+  background: hsl(var(--muted-foreground) / 0.35);
+}
+
+.scroll-area-bar-vertical .scroll-area-thumb {
+  left: 2px;
+  width: 6px;
+}
+
+.scroll-area-bar-horizontal .scroll-area-thumb {
+  top: 2px;
+  height: 6px;
+}
+
+.scroll-area-bar:hover .scroll-area-thumb {
+  background: hsl(var(--muted-foreground) / 0.55);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-area-bar { transition: none; }
+}
+
+@media (forced-colors: active) {
+  .scroll-area-thumb { background: CanvasText; }
+}
