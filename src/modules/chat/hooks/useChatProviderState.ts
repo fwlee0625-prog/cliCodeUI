@@ -199,7 +199,7 @@ export function useChatProviderState({ selectedSession, selectedProject: _select
       await Promise.all(
         PROVIDERS.map(async (p) => {
           try {
-            const response = await api.providers.models(p);
+            const response = await api.providers.runtimeModels(p);
             const body = (await response.json()) as ProviderModelsApiResponse;
             const models = body.success ? body.data?.models : undefined;
             if (!models || providerModelsRequestIdRef.current !== requestId) {

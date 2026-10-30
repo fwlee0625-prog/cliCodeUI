@@ -3,6 +3,7 @@ import { McpServers } from '@/modules/mcp';
 import { ProviderSkills } from '@/modules/skills';
 import AccountContent from '@/modules/settings/tabs/agents-settings/sections/content/AccountContent';
 import ModelsContent from '@/modules/settings/tabs/agents-settings/sections/content/ModelsContent';
+import AgentProvidersContent from '@/modules/settings/tabs/agents-settings/sections/content/AgentProvidersContent';
 import PermissionsContent from '@/modules/settings/tabs/agents-settings/sections/content/PermissionsContent';
 
 type AgentCategoryContentSectionProps = {
@@ -114,6 +115,10 @@ export default function AgentCategoryContentSection({
       {selectedCategory === 'models' && (
         // Keyed by agent so switching agents re-opens the panel on that agent's provider.
         <ModelsContent key={selectedAgent} initialProvider={selectedAgent} />
+      )}
+
+      {selectedCategory === 'providers' && (
+        <AgentProvidersContent key={selectedAgent} agent={selectedAgent} />
       )}
     </div>
   );

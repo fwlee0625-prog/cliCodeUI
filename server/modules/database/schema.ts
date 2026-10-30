@@ -196,12 +196,33 @@ CREATE TABLE IF NOT EXISTS provider_models (
 `;
 
 /**
- * Per-user application preferences that used to live in browser localStorage.
- *
- * One row per (user, key); `preference_value` is always a JSON document so a
- * key can hold a scalar (`"dark"`), a flag (`false`) or a whole settings blob
- * without the schema having to know which. Keeping them server-side is what
- * makes a preference follow the user from one device to another.
+ * Per-user custom API suppliers for each coding-agent runtime.
+ * API keys are kept server-side and are never returned by the list endpoint.
+ */
+export const AGENT_MODEL_PROVIDERS_TABLE_SCHEMA_SQL = `
+CREATE TABLE IF NOT EXISTS agent_model_providers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    agent TEXT NOT NULL CHECK (agent IN ('claude', 'codex', 'cursor', 'opencode')),
+    name TEXT NOT NULL,
+    api_format TEXT NOT NULL CHECK (api_format IN ('openai-compatible', 'anthropic')),
+    base_url TEXT NOT NULL,
+    api_key TEXT NOT NULL DEFAULT '',
+    models_json TEXT NOT NULL DEFAULT '[]',
+    default_model TEXT NOT NULL,
+    enabled BOOLEAN NOT NULL DEFAULT 1,
+    is_default BOOLEAN NOT NULL DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+`;
+
+/**
+ * Stores per-user preferences as JSON blobs keyed by a stable preference name.
+ * `preference_value` is always a JSON document so a key can hold a scalar,
+ * a flag or a whole settings blob without the schema having to know which.
+ * Keeping them server-side makes a preference follow the user across devices.
  */
 export const USER_PREFERENCES_TABLE_SCHEMA_SQL = `
 CREATE TABLE IF NOT EXISTS user_preferences (

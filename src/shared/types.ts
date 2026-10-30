@@ -1405,8 +1405,34 @@ export type SettingsMainTab = 'agents' | 'appearance' | 'git' | 'api' | 'voice' 
 /** The coding-agent CLI a settings screen is configuring, aliasing LLMProvider so agent-scoped settings read as being about an agent rather than a chat model. */
 export type AgentProvider = LLMProvider;
 
-/** One category of per-agent configuration in the agents settings tab (account, permissions, MCP servers, skills or the model library); use it to key which panel the tab renders. */
-export type AgentCategory = 'account' | 'permissions' | 'mcp' | 'skills' | 'models';
+/** One category of per-agent configuration in the agents settings tab (account, permissions, MCP servers, skills, model library or suppliers); use it to key which panel the tab renders. */
+export type AgentCategory = 'account' | 'permissions' | 'mcp' | 'skills' | 'models' | 'providers';
+
+/** A model identifier and its human-readable name inside a custom supplier. */
+export type AgentModelProviderModel = {
+  id: string;
+  name: string;
+};
+
+/** API protocol supported by custom model suppliers. */
+export type AgentModelProviderApiFormat = 'openai-compatible' | 'anthropic';
+
+/** Safe, browser-facing view of one configured third-party model supplier. */
+export type AgentModelProvider = {
+  id: number;
+  agent: AgentProvider;
+  name: string;
+  apiFormat: AgentModelProviderApiFormat;
+  baseUrl: string;
+  models: AgentModelProviderModel[];
+  defaultModel: string;
+  enabled: boolean;
+  isDefault: boolean;
+  hasApiKey: boolean;
+  apiKeyPreview: string;
+  createdAt: string;
+  updatedAt: string;
+};
 
 /** How much Codex may do without asking, from prompting on every edit to bypassing permission checks entirely; persisted as the Codex agent's permission setting. */
 export type CodexPermissionMode = 'default' | 'acceptEdits' | 'bypassPermissions';

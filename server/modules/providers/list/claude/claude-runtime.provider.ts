@@ -303,7 +303,19 @@ function mapCliOptionsToSDK(options: AnyRecord = {}) {
 
   const sdkOptions: AnyRecord = {};
 
-  sdkOptions.env = buildClaudeSdkEnv();
+  const agentModelProvider = options.agentModelProvider;
+  const hostEnv: NodeJS.ProcessEnv = { ...process.env };
+  if (agentModelProvider) {
+    // Do not let a machine-level Claude login/token override the supplier
+    // explicitly selected in this app.
+    delete hostEnv.ANTHROPIC_AUTH_TOKEN;
+    delete hostEnv.ANTHROPIC_API_KEY;
+    hostEnv.ANTHROPIC_BASE_URL = agentModelProvider.baseUrl.replace(/\/v1\/?$/i, '');
+    if (agentModelProvider.apiKey) {
+      hostEnv.ANTHROPIC_API_KEY = agentModelProvider.apiKey;
+    }
+  }
+  sdkOptions.env = buildClaudeSdkEnv(hostEnv);
 
   // Resolve the executable eagerly on Windows because the SDK uses raw child_process.spawn,
   // which does not reliably follow npm's shell wrappers like cross-spawn does.
@@ -1099,10 +1111,20 @@ async function queryClaudeSDK(
       console.warn('[Claude SDK] Unable to load provider models for effort validation:', error);
     }
 
+    const selectedModel = resolvedModel || options.model;
+    const agentModelProvider = await context.getAgentModelProvider?.(selectedModel) ?? null;
+    if (typeof selectedModel === 'string' && selectedModel.startsWith('cloudcli_') && !agentModelProvider) {
+      throw new Error('The selected custom model supplier is disabled or no longer exists. Choose another model.');
+    }
+    const modelForSdk = agentModelProvider && typeof selectedModel === 'string'
+      && selectedModel.startsWith(`${agentModelProvider.providerKey}/`)
+      ? selectedModel.slice(agentModelProvider.providerKey.length + 1)
+      : selectedModel;
     const sdkOptions = mapCliOptionsToSDK({
       ...options,
+      agentModelProvider,
       providerSessionId,
-      model: resolvedModel || options.model,
+      model: modelForSdk,
       effortModels,
     });
 

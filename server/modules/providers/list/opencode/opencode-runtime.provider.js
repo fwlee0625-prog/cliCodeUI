@@ -248,6 +248,11 @@ async function spawnOpenCode(command, options = {}, ws, context) {
     };
 
     void context.resolveResumeModel(sessionId, model).then(async (resolvedModel) => {
+      const agentModelProvider = await context.getAgentModelProvider?.(resolvedModel) ?? null;
+      if (typeof resolvedModel === 'string' && resolvedModel.startsWith('cloudcli_') && !agentModelProvider) {
+        reject(new Error('The selected custom model supplier is disabled or no longer exists. Choose another model.'));
+        return;
+      }
       let effortModels = null;
       try {
         effortModels = await context.getProviderModels();
@@ -287,10 +292,46 @@ async function spawnOpenCode(command, options = {}, ws, context) {
         args.push(flattenPromptForWindowsShell(promptWithAttachments));
       }
 
+      const customProviderEnv = agentModelProvider ? {
+        OPENCODE_CONFIG_CONTENT: JSON.stringify({
+          provider: {
+            [agentModelProvider.providerKey]: {
+              name: agentModelProvider.name,
+              npm: agentModelProvider.apiFormat === 'anthropic'
+                ? '@ai-sdk/anthropic'
+                : '@ai-sdk/openai-compatible',
+              options: {
+                baseURL: agentModelProvider.apiFormat === 'anthropic'
+                  && !/\/v1\/?$/i.test(agentModelProvider.baseUrl)
+                  ? `${agentModelProvider.baseUrl.replace(/\/+$/, '')}/v1`
+                  : agentModelProvider.baseUrl,
+                ...(agentModelProvider.apiKey ? { apiKey: agentModelProvider.apiKey } : {}),
+              },
+              models: Object.fromEntries(
+                agentModelProvider.models.map((entry) => [entry.id, { name: entry.name }]),
+              ),
+            },
+          },
+        }),
+      } : {};
+
+      const runtimeEnv = { ...process.env, ...permissionOptions.env };
+      if (agentModelProvider) {
+        // Never let credentials from the host login leak to a configured
+        // third-party provider when its own API key is intentionally blank.
+        delete runtimeEnv.OPENAI_API_KEY;
+        delete runtimeEnv.OPENAI_BASE_URL;
+        delete runtimeEnv.OPENAI_ORG_ID;
+        delete runtimeEnv.OPENAI_PROJECT_ID;
+        delete runtimeEnv.ANTHROPIC_API_KEY;
+        delete runtimeEnv.ANTHROPIC_AUTH_TOKEN;
+      }
+      Object.assign(runtimeEnv, customProviderEnv);
+
       opencodeProcess = spawnFunction('opencode', args, {
         cwd: workingDir,
         stdio: ['pipe', 'pipe', 'pipe'],
-        env: { ...process.env, ...permissionOptions.env },
+        env: runtimeEnv,
       });
 
       activeOpenCodeProcesses.set(processKey, opencodeProcess);

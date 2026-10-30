@@ -426,6 +426,18 @@ export const api = {
     claudeSettingsPermissions: () => get('/api/providers/claude/settings-permissions'),
 
     models: (provider: string) => get(`/api/providers/${provider}/models`),
+    runtimeModels: (provider: string) => get(`/api/providers/${provider}/runtime-models`),
+    modelProviders: (provider: string) => get(`/api/providers/${provider}/model-providers`),
+    createModelProvider: (provider: string, input: unknown) =>
+      post(`/api/providers/${provider}/model-providers`, input),
+    updateModelProvider: (provider: string, id: string | number, input: unknown) =>
+      patch(`/api/providers/${provider}/model-providers/${id}`, input),
+    deleteModelProvider: (provider: string, id: string | number) =>
+      del(`/api/providers/${provider}/model-providers/${id}`),
+    testModelProvider: (provider: string, input: unknown) =>
+      post(`/api/providers/${provider}/model-providers/test`, input),
+    discoverModelProviderModels: (provider: string, input: unknown) =>
+      post(`/api/providers/${provider}/model-providers/discover`, input),
     createModel: (provider: string, input: unknown) =>
       post(`/api/providers/${provider}/models`, input),
     updateModel: (provider: string, recordId: string | number, input: unknown) =>
