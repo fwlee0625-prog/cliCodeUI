@@ -1,4 +1,5 @@
 import { providerRegistry } from '@/modules/providers/provider.registry.js';
+import { agentModelProvidersService } from '@/modules/providers/services/agent-model-providers.service.js';
 import { providerModelsService } from '@/modules/providers/services/provider-models.service.js';
 import { sessionsService } from '@/modules/providers/services/sessions.service.js';
 import type { IProvider } from '@/shared/interfaces.js';
@@ -46,11 +47,23 @@ export function createProviderRuntimeService(
 
   const createRuntimeContext = (
     provider: IProvider,
+    userId: number | null,
   ): ProviderRuntimeContext => ({
     resolveProviderSessionId: dependencies.resolveProviderSessionId,
-    resolveResumeModel: (sessionId, requestedModel) =>
-      dependencies.resolveResumeModel(provider.id, sessionId, requestedModel),
-    getProviderModels: async () => dependencies.getProviderModels(provider.id),
+    resolveResumeModel: async (sessionId, requestedModel) => {
+      const resolved = await dependencies.resolveResumeModel(provider.id, sessionId, requestedModel);
+      if (resolved) return resolved;
+      const defaultSupplier = agentModelProvidersService.getActiveProvider(userId, provider.id);
+      return defaultSupplier
+        ? `${defaultSupplier.providerKey}/${defaultSupplier.defaultModel}`
+        : undefined;
+    },
+    getProviderModels: async () => {
+      const fallback = await dependencies.getProviderModels(provider.id);
+      return agentModelProvidersService.getRuntimeModelCatalog(userId, provider.id, fallback);
+    },
+    getAgentModelProvider: async (model) =>
+      agentModelProvidersService.getActiveProvider(userId, provider.id, model),
     normalizeMessage: (raw, sessionId) => provider.sessions.normalizeMessage(raw, sessionId),
     async isProviderInstalled() {
       try {
@@ -69,7 +82,9 @@ export function createProviderRuntimeService(
     writer: ProviderRuntimeWriter,
   ): Promise<unknown> => {
     const provider = dependencies.resolveProvider(providerName);
-    return provider.runtime.run(command, options, writer, createRuntimeContext(provider));
+    const parsedUserId = Number(writer.userId);
+    const userId = Number.isSafeInteger(parsedUserId) && parsedUserId > 0 ? parsedUserId : null;
+    return provider.runtime.run(command, options, writer, createRuntimeContext(provider, userId));
   };
 
   return {

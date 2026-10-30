@@ -35,8 +35,8 @@ export default function AgentsSettingsTab({
   const [selectedCategory, setSelectedCategory] = useState<AgentCategory>('account');
   const visibleCategories = useMemo<AgentCategory[]>(() => (
     selectedAgent === 'opencode'
-      ? ['account', 'permissions', 'mcp', 'models']
-      : ['account', 'permissions', 'mcp', 'skills', 'models']
+      ? ['account', 'permissions', 'mcp', 'models', 'providers']
+      : ['account', 'permissions', 'mcp', 'skills', 'models', 'providers']
   ), [selectedAgent]);
 
   const visibleAgents = useMemo<AgentProvider[]>(() => {

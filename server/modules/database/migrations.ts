@@ -1,6 +1,7 @@
 import { Database } from 'better-sqlite3';
 
 import {
+  AGENT_MODEL_PROVIDERS_TABLE_SCHEMA_SQL,
   APP_CONFIG_TABLE_SCHEMA_SQL,
   LAST_SCANNED_AT_SQL,
   NOTIFICATION_CHANNEL_ENDPOINTS_TABLE_SCHEMA_SQL,
@@ -513,6 +514,11 @@ export const runMigrations = (db: Database) => {
     db.exec('CREATE INDEX IF NOT EXISTS idx_notification_channel_endpoints_user_channel ON notification_channel_endpoints(user_id, channel)');
     db.exec('CREATE INDEX IF NOT EXISTS idx_notification_channel_endpoints_enabled ON notification_channel_endpoints(enabled)');
     db.exec(PROVIDER_MODELS_TABLE_SCHEMA_SQL);
+    db.exec(AGENT_MODEL_PROVIDERS_TABLE_SCHEMA_SQL);
+    db.exec(`
+      CREATE INDEX IF NOT EXISTS idx_agent_model_providers_user_agent_default
+      ON agent_model_providers(user_id, agent, enabled, is_default);
+    `);
     db.exec(`
       CREATE INDEX IF NOT EXISTS idx_provider_models_provider_order
       ON provider_models(provider, sort_order, id)

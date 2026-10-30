@@ -308,14 +308,56 @@ async function queryCodex(
   const sessionKey = () => sessionId || capturedSessionId || null;
 
   try {
-    codex = new Codex();
+    const agentModelProvider = await context.getAgentModelProvider?.(resolvedModel) ?? null;
+    if (typeof resolvedModel === 'string' && resolvedModel.startsWith('cloudcli_') && !agentModelProvider) {
+      throw new Error('The selected custom model supplier is disabled or no longer exists. Choose another model.');
+    }
+    const modelForCodex = agentModelProvider && typeof resolvedModel === 'string'
+      && resolvedModel.startsWith(`${agentModelProvider.providerKey}/`)
+      ? resolvedModel.slice(agentModelProvider.providerKey.length + 1)
+      : resolvedModel;
+    if (agentModelProvider) {
+      // Codex supports custom Responses API providers through SDK config
+      // overrides. Remove machine-level OpenAI credentials before passing the
+      // selected supplier's key so they cannot be sent to a third-party URL.
+      const codexEnv = Object.fromEntries(
+        Object.entries(process.env).filter(
+          (entry): entry is [string, string] => typeof entry[1] === 'string',
+        ),
+      );
+      delete codexEnv.OPENAI_API_KEY;
+      delete codexEnv.CODEX_API_KEY;
+      delete codexEnv.OPENAI_ORG_ID;
+      delete codexEnv.OPENAI_PROJECT_ID;
+      if (agentModelProvider.apiKey) {
+        codexEnv.OPENAI_API_KEY = agentModelProvider.apiKey;
+      }
+      codex = new Codex({
+        env: codexEnv,
+        config: {
+          model_provider: agentModelProvider.providerKey,
+          model_providers: {
+            [agentModelProvider.providerKey]: {
+              name: agentModelProvider.name,
+              base_url: agentModelProvider.baseUrl,
+              ...(agentModelProvider.apiKey ? { env_key: 'OPENAI_API_KEY' } : {}),
+              wire_api: 'responses',
+              requires_openai_auth: false,
+              supports_websockets: false,
+            },
+          },
+        },
+      });
+    } else {
+      codex = new Codex();
+    }
 
     const threadOptions: ThreadOptions = {
       workingDirectory,
       skipGitRepoCheck: true,
       sandboxMode,
       approvalPolicy,
-      model: resolvedModel,
+      model: modelForCodex,
       modelReasoningEffort: resolvedEffort,
     };
 

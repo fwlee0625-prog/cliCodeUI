@@ -628,6 +628,23 @@ export type ProviderRuntimePermissionGateway = {
 };
 
 /**
+ * A saved third-party model supplier resolved for one user's coding-agent run.
+ * The API key is server-only and must never be sent to the browser.
+ */
+export type AgentModelProviderRuntimeConfig = {
+  id: number;
+  agent: LLMProvider;
+  name: string;
+  apiFormat: 'openai-compatible' | 'anthropic';
+  baseUrl: string;
+  apiKey: string;
+  models: { id: string; name: string }[];
+  defaultModel: string;
+  /** Stable namespace embedded in custom model selections for every agent. */
+  providerKey: string;
+};
+
+/**
  * Provider-scoped application capabilities supplied to a runtime for one run.
  *
  * Keeping these lookups outside concrete SDK/CLI adapters prevents the
@@ -640,6 +657,8 @@ export type ProviderRuntimeContext = {
     requestedModel?: string | null,
   ): Promise<string | undefined>;
   getProviderModels(): Promise<ProviderModelsDefinition>;
+  /** Returns the user's active third-party supplier for this agent, if one is configured. */
+  getAgentModelProvider?(model?: string): Promise<AgentModelProviderRuntimeConfig | null>;
   normalizeMessage(raw: unknown, sessionId: string | null): NormalizedMessage[];
   isProviderInstalled(): Promise<boolean>;
   /**

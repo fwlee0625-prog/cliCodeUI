@@ -1,6 +1,7 @@
 import express, { type Request, type Response } from 'express';
 
 import { providerAuthService } from '@/modules/providers/services/provider-auth.service.js';
+import { agentModelProvidersService } from '@/modules/providers/services/agent-model-providers.service.js';
 import { claudeSettingsPermissionsService } from '@/modules/providers/services/claude-settings-permissions.service.js';
 import { providerCapabilitiesService } from '@/modules/providers/services/provider-capabilities.service.js';
 import { providerCliService } from '@/modules/providers/services/provider-cli.service.js';
@@ -23,6 +24,19 @@ import type {
 import { AppError, asyncHandler, createApiSuccessResponse } from '@/shared/utils.js';
 
 const router = express.Router();
+
+type AuthenticatedRequest = Request & { user?: { id?: number | string } };
+
+const readUserId = (req: Request): number => {
+  const userId = Number((req as AuthenticatedRequest).user?.id);
+  if (!Number.isSafeInteger(userId) || userId < 1) {
+    throw new AppError('Authenticated user is missing.', {
+      code: 'AUTH_USER_MISSING',
+      statusCode: 401,
+    });
+  }
+  return userId;
+};
 
 const readPathParam = (value: unknown, name: string): string => {
   if (typeof value === 'string') {
@@ -633,6 +647,87 @@ router.post(
   asyncHandler(async (req: Request, res: Response) => {
     const provider = parseProvider(req.params.provider);
     res.json(createApiSuccessResponse(await providerCliService.updateCli(provider)));
+  }),
+);
+
+router.get(
+  '/:provider/runtime-models',
+  asyncHandler(async (req: Request, res: Response) => {
+    const provider = parseProvider(req.params.provider);
+    const userId = readUserId(req);
+    const fallback = await providerModelsService.getProviderModels(provider);
+    const models = agentModelProvidersService.getRuntimeModelCatalog(userId, provider, fallback);
+    res.json(createApiSuccessResponse({ provider, models }));
+  }),
+);
+
+router.get(
+  '/:provider/model-providers',
+  asyncHandler(async (req: Request, res: Response) => {
+    const provider = parseProvider(req.params.provider);
+    res.json(createApiSuccessResponse(agentModelProvidersService.list(readUserId(req), provider)));
+  }),
+);
+
+router.post(
+  '/:provider/model-providers',
+  asyncHandler(async (req: Request, res: Response) => {
+    const provider = parseProvider(req.params.provider);
+    const result = agentModelProvidersService.save(
+      readUserId(req),
+      provider,
+      (req.body && typeof req.body === 'object' ? req.body : {}) as Record<string, unknown>,
+    );
+    res.status(201).json(createApiSuccessResponse(result));
+  }),
+);
+
+router.post(
+  '/:provider/model-providers/test',
+  asyncHandler(async (req: Request, res: Response) => {
+    const provider = parseProvider(req.params.provider);
+    const result = await agentModelProvidersService.testConnection(
+      readUserId(req),
+      provider,
+      (req.body && typeof req.body === 'object' ? req.body : {}) as Record<string, unknown>,
+    );
+    res.json(createApiSuccessResponse(result));
+  }),
+);
+
+router.post(
+  '/:provider/model-providers/discover',
+  asyncHandler(async (req: Request, res: Response) => {
+    const provider = parseProvider(req.params.provider);
+    const result = await agentModelProvidersService.discoverModels(
+      readUserId(req),
+      provider,
+      (req.body && typeof req.body === 'object' ? req.body : {}) as Record<string, unknown>,
+    );
+    res.json(createApiSuccessResponse(result));
+  }),
+);
+
+router.patch(
+  '/:provider/model-providers/:recordId',
+  asyncHandler(async (req: Request, res: Response) => {
+    const provider = parseProvider(req.params.provider);
+    const recordId = parseModelRecordId(req.params.recordId);
+    const result = agentModelProvidersService.save(
+      readUserId(req),
+      provider,
+      { ...((req.body && typeof req.body === 'object' ? req.body : {}) as Record<string, unknown>), id: recordId },
+    );
+    res.json(createApiSuccessResponse(result));
+  }),
+);
+
+router.delete(
+  '/:provider/model-providers/:recordId',
+  asyncHandler(async (req: Request, res: Response) => {
+    const provider = parseProvider(req.params.provider);
+    const recordId = parseModelRecordId(req.params.recordId);
+    res.json(createApiSuccessResponse(agentModelProvidersService.delete(readUserId(req), provider, recordId)));
   }),
 );
 
