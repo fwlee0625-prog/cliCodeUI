@@ -150,7 +150,9 @@ function SidebarSessionItem({
   return (
     <div className="group relative">
       {(showAttentionIndicator || showBackgroundIndicator || showRecentIndicator) && (
-        <div className="absolute left-0 top-1/2 -translate-x-1 -translate-y-1/2 transform">
+        // `flex` keeps the inline-block Tooltip wrapper on the box (not the
+        // text baseline), so the -translate-y-1/2 really centers the dot.
+        <div className="absolute left-0 top-1/2 flex -translate-x-1 -translate-y-1/2 transform">
           <Tooltip content={indicatorLabel} position="right">
             <div
               role="status"
@@ -207,15 +209,7 @@ function SidebarSessionItem({
                 >
                   {sessionView.sessionName}
                 </div>
-                {isProcessing ? (
-                  <span className="ml-auto flex-shrink-0">
-                    <Tooltip content={t('tooltips.processingSessionIndicator', 'Processing session')} position="top">
-                      <span className="flex h-5 w-5 items-center justify-center rounded-md text-muted-foreground">
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                      </span>
-                    </Tooltip>
-                  </span>
-                ) : compactSessionAge && (
+                {!isProcessing && compactSessionAge && (
                   <span className="ml-auto flex-shrink-0 text-[10px] text-muted-foreground">{compactSessionAge}</span>
                 )}
               </div>
@@ -227,6 +221,19 @@ function SidebarSessionItem({
                 </div>
               )}
             </div>
+
+            {isProcessing && (
+              // Centers on the card like the options button, not on the name
+              // line. `flex` keeps Tooltip's inline-block wrapper from aligning
+              // to the text baseline, which rode the icon above center.
+              <span className="flex flex-shrink-0">
+                <Tooltip content={t('tooltips.processingSessionIndicator', 'Processing session')} position="top">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-md text-muted-foreground">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  </span>
+                </Tooltip>
+              </span>
+            )}
 
             {!isSelecting && (
               <button
@@ -431,20 +438,7 @@ function SidebarSessionItem({
                 >
                   {sessionView.sessionName}
                 </div>
-                {isProcessing ? (
-                  <span
-                    className={cn(
-                      'ml-auto flex-shrink-0 transition-opacity duration-200',
-                      isEditing ? 'opacity-0' : !isSelecting && 'group-hover:opacity-0',
-                    )}
-                  >
-                    <Tooltip content={t('tooltips.processingSessionIndicator', 'Processing session')} position="top">
-                      <span className="flex h-5 w-5 items-center justify-center rounded-md text-muted-foreground">
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                      </span>
-                    </Tooltip>
-                  </span>
-                ) : compactSessionAge && (
+                {!isProcessing && compactSessionAge && (
                   <span
                     className={cn(
                       'ml-auto flex-shrink-0 text-[10px] text-muted-foreground transition-opacity duration-200',
@@ -468,6 +462,25 @@ function SidebarSessionItem({
                 </div>
               )}
             </div>
+            {isProcessing && (
+              // On the row, not the name line, so it centers like the options
+              // button even when a hidden badge makes the row two lines tall.
+              // `flex` matters: Tooltip's inline-block wrapper aligns to the
+              // text baseline inside a plain span, which rides the icon ~1.5px
+              // above the row's center.
+              <span
+                className={cn(
+                  'flex flex-shrink-0 transition-opacity duration-200',
+                  isEditing ? 'opacity-0' : !isSelecting && 'group-hover:opacity-0',
+                )}
+              >
+                <Tooltip content={t('tooltips.processingSessionIndicator', 'Processing session')} position="top">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-md text-muted-foreground">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  </span>
+                </Tooltip>
+              </span>
+            )}
           </div>
         </a>
 

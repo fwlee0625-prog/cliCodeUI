@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { agentModelProvidersDb } from '@/modules/database/repositories/agent-model-providers.db.js';
+import { agentModelProvidersDb } from '@/modules/database/index.js';
 import type {
   AgentModelProviderInput,
   AgentModelProviderRecord,
-} from '@/modules/database/repositories/agent-model-providers.db.js';
+} from '@/modules/database/index.js';
 import { createAgentModelProvidersService } from '@/modules/providers/services/agent-model-providers.service.js';
 import type { LLMProvider, ProviderModelsDefinition } from '@/shared/types.js';
 
@@ -78,7 +78,7 @@ const createFallbackCatalog = (): ProviderModelsDefinition => ({
 const createTestService = () => {
   const { repository, records } = createRepository();
   const requests: Array<{ url: string; headers: Headers }> = [];
-  const fetchMock = (async (input: RequestInfo | URL, init?: RequestInit) => {
+  const fetchMock = (async (input: Parameters<typeof fetch>[0], init?: RequestInit) => {
     requests.push({
       url: String(input),
       headers: new Headers(init?.headers),

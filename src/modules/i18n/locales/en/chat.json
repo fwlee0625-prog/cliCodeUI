@@ -73,6 +73,18 @@
     "readTodo": "Read todo list",
     "searchResults": "results"
   },
+  "toolLabels": {
+    "checklist": "Checklist",
+    "question": "Question"
+  },
+  "askUserQuestion": {
+    "questionsProgress": "{{total}} questions — {{answered}} answered",
+    "questionsCount_one": "{{count}} question",
+    "questionsCount_other": "{{count}} questions",
+    "custom": "(custom)",
+    "skipped": "Skipped",
+    "noAnswer": "No answer provided"
+  },
   "search": {
     "found": "Found {{count}} {{type}}",
     "file": "file",

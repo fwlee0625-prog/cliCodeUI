@@ -1,8 +1,7 @@
 import { Settings, ArrowUpCircle, Bug, AlertTriangle } from 'lucide-react';
 import type { TFunction } from 'i18next';
 
-import { BRAND_REPOSITORY_URL, BRAND_NAME } from '@/shared/constants';
-import { IS_PLATFORM } from '@/shared/utils';
+import { BRAND_REPOSITORY_URL } from '@/shared/constants';
 import type { ReleaseInfo } from '@/shared/types';
 
 const GITHUB_ISSUES_URL = `${BRAND_REPOSITORY_URL}/issues/new`;
@@ -22,7 +21,6 @@ type SidebarFooterProps = {
   restartRequired: boolean;
   releaseInfo: ReleaseInfo | null;
   latestVersion: string | null;
-  currentVersion: string;
   onShowVersionModal: () => void;
   onShowSettings: () => void;
   t: TFunction;
@@ -34,7 +32,6 @@ export default function SidebarFooter({
   restartRequired,
   releaseInfo,
   latestVersion,
-  currentVersion,
   onShowVersionModal,
   onShowSettings,
   t,
@@ -144,20 +141,6 @@ export default function SidebarFooter({
           <span className="text-[13px]">{t('actions.settings')}</span>
         </button>
       </div>
-
-      {/* Desktop version brand line (OSS mode only) */}
-      {!IS_PLATFORM && (
-        <div className="hidden px-3 py-2 text-center md:block">
-          <a
-            href={BRAND_REPOSITORY_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[9px] text-muted-foreground/40 transition-colors hover:text-muted-foreground"
-          >
-            {BRAND_NAME} v{currentVersion} – {t('branding.openSource')}
-          </a>
-        </div>
-      )}
 
       {/* Mobile Report Issue */}
       <div className="px-3 pt-3 md:hidden">

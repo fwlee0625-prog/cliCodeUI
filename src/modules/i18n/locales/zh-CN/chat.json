@@ -65,6 +65,18 @@
     "readTodo": "读取待办列表",
     "searchResults": "结果"
   },
+  "toolLabels": {
+    "checklist": "检查清单",
+    "question": "提问"
+  },
+  "askUserQuestion": {
+    "questionsProgress": "{{total}} 个问题 — 已回答 {{answered}} 个",
+    "questionsCount_one": "{{count}} 个问题",
+    "questionsCount_other": "{{count}} 个问题",
+    "custom": "（自定义）",
+    "skipped": "已跳过",
+    "noAnswer": "未提供答案"
+  },
   "search": {
     "found": "找到 {{count}} 个{{type}}",
     "file": "文件",

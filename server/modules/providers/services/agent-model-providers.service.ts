@@ -1,10 +1,10 @@
-import { agentModelProvidersDb } from '@/modules/database/repositories/agent-model-providers.db.js';
+import { agentModelProvidersDb } from '@/modules/database/index.js';
 import type {
   AgentModelProviderApiFormat,
   AgentModelProviderInput,
   AgentModelProviderModel,
   AgentModelProviderRecord,
-} from '@/modules/database/repositories/agent-model-providers.db.js';
+} from '@/modules/database/index.js';
 import type {
   AgentModelProviderRuntimeConfig,
   LLMProvider,

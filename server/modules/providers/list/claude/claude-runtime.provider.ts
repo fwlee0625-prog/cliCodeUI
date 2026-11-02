@@ -298,6 +298,37 @@ export function buildClaudeSdkEnv(hostEnv: NodeJS.ProcessEnv = process.env): Nod
   };
 }
 
+/**
+ * The `systemPrompt.append` text that steers the model's generated metadata
+ * into the user's interface language.
+ *
+ * Tool-call descriptions, question headers and todo titles are written by the
+ * model itself, so the UI's localized labels would otherwise sit above English
+ * text. Only languages the app ships a display name for get an instruction;
+ * anything else — and English itself, the prompt's native language — leaves
+ * the preset prompt untouched.
+ */
+const LANGUAGE_DISPLAY_NAMES: Record<string, string> = {
+  'zh-CN': 'Simplified Chinese (简体中文)',
+};
+
+export function buildLanguageInstruction(language: unknown): string | undefined {
+  if (typeof language !== 'string') {
+    return undefined;
+  }
+
+  const languageName = LANGUAGE_DISPLAY_NAMES[language];
+  if (!languageName) {
+    return undefined;
+  }
+
+  return [
+    `The user's interface language is ${languageName}.`,
+    `Write every model-generated user-facing metadata line in ${languageName}: the "description" field of tool calls (Bash, Read, Grep, etc.), AskUserQuestion headers, questions and options, task and todo-list item subjects, and plan documents.`,
+    'Keep code, file paths, shell commands, identifiers, and quoted output unchanged.',
+  ].join(' ');
+}
+
 function mapCliOptionsToSDK(options: AnyRecord = {}) {
   const { providerSessionId, cwd, toolsSettings, permissionMode, effort, resumeAnchorId, resumeFromScratch } = options;
 
@@ -372,10 +403,16 @@ function mapCliOptionsToSDK(options: AnyRecord = {}) {
     options.effortModels || CLAUDE_PREDEFINED_MODELS,
   ));
 
-  sdkOptions.systemPrompt = {
-    type: 'preset',
-    preset: 'claude_code'
-  };
+  // The preset prompt stays untouched unless the user's interface language
+  // asks for localized model-generated metadata (tool descriptions, question
+  // headers, todo subjects); then the directive rides on `append`.
+  const languageInstruction = buildLanguageInstruction(options.uiLanguage);
+  sdkOptions.systemPrompt = languageInstruction
+    ? { type: 'preset', preset: 'claude_code', append: languageInstruction }
+    : {
+      type: 'preset',
+      preset: 'claude_code'
+    };
 
   sdkOptions.settingSources = ['project', 'user', 'local'];
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Check, Edit2, GitBranch, MoreHorizontal, Trash2, X } from 'lucide-react';
 import type { TFunction } from 'i18next';
 
@@ -66,6 +66,11 @@ export default function SessionOptions({
   const providerLabel = PROVIDER_LABELS[provider];
   const { copyState, copyLabel, setOptionsOpen, handleCopyAction, isCopyPending, CopyStateIcon } =
     useProviderSessionIdCopy(sessionId, providerLabel, t);
+
+  // The trigger is hidden until its row is hovered, like the project row's
+  // controls, so an open menu must pin it visible: a keyboard-opened menu moves
+  // focus into the portaled menu, outside the row's hover group.
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Read from the backend capability matrix rather than branching on the
   // provider id here; the request is cached module-side, so every row shares one.
@@ -148,8 +153,16 @@ export default function SessionOptions({
           portal
           variant="ghost"
           size="icon"
-          onOpenChange={setOptionsOpen}
-          triggerClassName="h-7 w-7 text-muted-foreground opacity-70 hover:bg-muted hover:opacity-100"
+          onOpenChange={(open) => {
+            setIsMenuOpen(open);
+            setOptionsOpen(open);
+          }}
+          triggerClassName={cn(
+            'h-7 w-7 text-muted-foreground transition-opacity duration-200 hover:bg-muted',
+            isMenuOpen
+              ? 'opacity-100'
+              : 'opacity-0 group-focus-within:opacity-100 group-hover:opacity-100',
+          )}
           menuClassName="w-[260px] rounded-xl p-1.5 shadow-xl"
           header={(
             <div className="mb-1 border-b border-border px-3 py-2">

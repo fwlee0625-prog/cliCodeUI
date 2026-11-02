@@ -109,9 +109,6 @@
     "forkDescription": "Continue from a copy, leaving this one untouched.",
     "archiveOrDelete": "Archive or delete session"
   },
-  "branding": {
-    "openSource": "Open Source"
-  },
   "status": {
     "active": "Active",
     "inactive": "Inactive",

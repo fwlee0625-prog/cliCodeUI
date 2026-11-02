@@ -1,7 +1,9 @@
 /**
  * Centralized tool configuration registry
- * Defines display behavior for all tool types 
+ * Defines display behavior for all tool types
  */
+
+import { i18n } from '@/modules/i18n';
 
 export type ToolDisplayConfig = {
   input: {
@@ -86,17 +88,20 @@ function summarizeToolInput(input: unknown): string {
  * The canonical tool names are Claude's, so a Codex plan update would otherwise
  * announce itself as `TodoWrite`. Naming the surface instead of the tool keeps
  * the two providers reading as one product.
+ *
+ * The values are i18n keys — `formatToolDisplayName` resolves them through the
+ * active locale at render time.
  */
 const UNIFIED_TOOL_LABELS: Record<string, string> = {
-  TodoWrite: 'Checklist',
-  TodoRead: 'Checklist',
-  AskUserQuestion: 'Question',
+  TodoWrite: 'chat:toolLabels.checklist',
+  TodoRead: 'chat:toolLabels.checklist',
+  AskUserQuestion: 'chat:toolLabels.question',
 };
 
 export function formatToolDisplayName(toolName: string): string {
-  const unifiedLabel = UNIFIED_TOOL_LABELS[toolName];
-  if (unifiedLabel) {
-    return unifiedLabel;
+  const unifiedLabelKey = UNIFIED_TOOL_LABELS[toolName];
+  if (unifiedLabelKey) {
+    return i18n.t(unifiedLabelKey);
   }
 
   const mcpMatch = /^mcp__([^_]+(?:_[^_]+)*)__(.+)$/.exec(toolName);
@@ -656,15 +661,15 @@ export const TOOL_CONFIGS: Record<string, ToolDisplayConfig> = {
         const questions = Array.isArray(input?.questions) ? input.questions : [];
         const answers = input?.answers || {};
         if (questions.length === 1) {
-          const header = questions[0]?.header || 'Question';
+          const header = questions[0]?.header || i18n.t('chat:toolLabels.question');
           const answer = answers[questions[0]?.question];
           return answer ? `${header} — ${answer}` : header;
         }
 
         const answered = questions.filter((question: any) => answers[question?.question]).length;
         return answered > 0
-          ? `${questions.length} questions — ${answered} answered`
-          : `${questions.length} questions`;
+          ? i18n.t('chat:askUserQuestion.questionsProgress', { total: questions.length, answered })
+          : i18n.t('chat:askUserQuestion.questionsCount', { count: questions.length });
       },
       defaultOpen: true,
       contentType: 'question-answer',
@@ -686,7 +691,9 @@ export const TOOL_CONFIGS: Record<string, ToolDisplayConfig> = {
   exit_plan_mode: {
     input: {
       type: 'plan',
-      title: 'Implementation plan',
+      // A function, not a string: the config object is built once at module
+      // load, while the locale can change afterwards.
+      title: () => i18n.t('chat:plan.title'),
       defaultOpen: true,
       contentType: 'markdown',
       getContentProps: (input) => ({
@@ -702,7 +709,7 @@ export const TOOL_CONFIGS: Record<string, ToolDisplayConfig> = {
   ExitPlanMode: {
     input: {
       type: 'plan',
-      title: 'Implementation plan',
+      title: () => i18n.t('chat:plan.title'),
       defaultOpen: true,
       contentType: 'markdown',
       getContentProps: (input) => ({

@@ -108,9 +108,6 @@
     "forkDescription": "从副本继续，不影响当前会话。",
     "archiveOrDelete": "归档或删除会话"
   },
-  "branding": {
-    "openSource": "开源"
-  },
   "status": {
     "active": "活动",
     "inactive": "非活动",

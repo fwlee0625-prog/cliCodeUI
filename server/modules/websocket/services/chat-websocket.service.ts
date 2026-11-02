@@ -2,7 +2,7 @@ import path from 'node:path';
 
 import type { WebSocket } from 'ws';
 
-import { sessionsDb } from '@/modules/database/index.js';
+import { sessionsDb, userPreferencesDb } from '@/modules/database/index.js';
 import { providerModelsService, sessionsService } from '@/modules/providers/index.js';
 import { chatRunRegistry } from '@/modules/websocket/services/chat-run-registry.service.js';
 import { connectedClients, WS_OPEN_STATE } from '@/modules/websocket/services/websocket-state.service.js';
@@ -205,6 +205,25 @@ function resolveSendTarget(
 }
 
 /**
+ * The language model-generated run metadata should be written in.
+ *
+ * Tool-call descriptions, question headers and todo titles are composed by the
+ * provider, so their language follows the user's saved `userLanguage`
+ * preference rather than any client-side UI state. Resolved here — the one
+ * point where the turn still knows which user asked — and handed to runtimes
+ * that can steer the model with it.
+ */
+function resolveUiLanguage(userId: string | number | null): string | undefined {
+  const numericId = typeof userId === 'number' ? userId : Number(userId);
+  if (!Number.isInteger(numericId) || numericId <= 0) {
+    return undefined;
+  }
+
+  const language = userPreferencesDb.getPreferences(numericId).userLanguage;
+  return typeof language === 'string' && language.trim() ? language : undefined;
+}
+
+/**
  * Registers the run and hands the turn to the provider runtime.
  *
  * `extraRuntimeOptions` is how an edited message asks the provider to resume
@@ -282,6 +301,9 @@ async function dispatchRun(
     sessionId,
     cwd: clientOptions.cwd ?? session.project_path ?? undefined,
     projectPath: session.project_path ?? clientOptions.projectPath,
+    // Server-authoritative: the saved user preference decides the language the
+    // provider writes its descriptions in, not whatever a tab sends.
+    uiLanguage: resolveUiLanguage(userId),
   };
 
   let failure: string | null = null;

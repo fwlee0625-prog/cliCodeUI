@@ -6,6 +6,11 @@ import { renderToStaticMarkup } from 'react-dom/server';
 
 import { QuestionAnswerContent } from '@/modules/chat/tools/ContentRenderers/QuestionAnswerContent';
 
+// The component translates its "(custom)" / "Skipped" labels through i18next;
+// loading the config here keeps the render using real strings instead of
+// raw translation keys (and silences the missing-instance warning).
+import '@/modules/i18n';
+
 // Regression coverage for the chat-interface crash where an AskUserQuestion
 // payload loaded from a session transcript arrives with a non-array `questions`
 // or a question missing its `options` array. Rendering must degrade gracefully
