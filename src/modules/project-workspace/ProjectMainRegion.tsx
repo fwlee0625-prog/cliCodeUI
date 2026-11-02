@@ -24,7 +24,6 @@ function ProjectMainRegion({
     registerOptimisticSession,
     handleProjectSelect,
     refreshProjectsSilently,
-    renameSession,
   } = useProjectMainState();
 
   const handleOpenSidebar = useCallback(() => {
@@ -67,7 +66,6 @@ function ProjectMainRegion({
       newSessionTrigger={newSessionTrigger}
       onProjectSelect={handleProjectSelect}
       onProjectsRefresh={handleProjectsRefresh}
-      onRenameSession={renameSession}
     />
   );
 }

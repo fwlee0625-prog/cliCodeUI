@@ -162,17 +162,6 @@ export const MCP_SUPPORTS_WORKING_DIRECTORY: Record<McpProvider, boolean> = {
 
 // ---------------------------
 
-//----------------- QUICK SETTINGS PANEL ROWS ------------
-
-/**
- * Class list for one row in the quick settings panel. Shared so plain rows and the clickable
- * toggle row (which appends `cursor-pointer`) stay visually identical.
- */
-export const SETTING_ROW_CLASS =
-  'flex items-center justify-between p-3 rounded-lg bg-muted/60 hover:bg-accent transition-colors border border-transparent hover:border-border';
-
-// ---------------------------
-
 //----------------- TERMINAL TIMING ------------
 
 /**

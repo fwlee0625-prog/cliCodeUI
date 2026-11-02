@@ -106,7 +106,7 @@ export default function WorkspaceTabs({
     <div className="flex min-w-max items-center gap-2">
       <div ref={onProviderSelectorTarget} className="shrink-0 empty:hidden" />
       <PillBar
-        className="border border-border/40 bg-muted/50 shadow-inner shadow-black/[0.025] dark:shadow-black/10"
+        className="rounded-md bg-transparent p-0"
       >
         <div role="tablist" aria-label={t('tabs.views', { defaultValue: 'Workspace views' })} className="inline-flex items-center gap-[2px]">
           {tabs.map((tab, index) => {
@@ -127,7 +127,7 @@ export default function WorkspaceTabs({
                     isActive={isActive}
                     onClick={() => setActiveTab(tab.id)}
                     onKeyDown={handleTabKeyDown}
-                    className="h-8 max-w-44 px-2.5 py-[5px]"
+                    className="h-6 w-6 justify-center px-0"
                   >
                     {tab.kind === 'builtin' ? (
                       <tab.icon className="h-3.5 w-3.5 shrink-0" strokeWidth={isActive ? 2.2 : 1.8} />
@@ -138,9 +138,6 @@ export default function WorkspaceTabs({
                         className="flex h-3.5 w-3.5 shrink-0 items-center justify-center [&>svg]:h-full [&>svg]:w-full"
                       />
                     )}
-                    <span className={`${isActive ? 'inline max-w-28' : 'hidden'} truncate sm:max-w-36 lg:inline`}>
-                      {displayLabel}
-                    </span>
                   </Pill>
                 </Tooltip>
               </Fragment>

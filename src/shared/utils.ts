@@ -2,7 +2,7 @@ import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
 import { BRAND_NAME } from '@/shared/constants';
-import type { Project, ProjectSession, QuickSettingsTab, SlashCommand } from '@/shared/types';
+import type { Project, ProjectSession, SlashCommand } from '@/shared/types';
 
 //----------------- DEPLOYMENT MODE ------------
 
@@ -243,14 +243,6 @@ export const isSkillCommand = (command: SlashCommand): boolean =>
   command.type === 'skill' || command.metadata?.type === 'skill';
 
 // ---------------------------
-
-//----------------- QUICK SETTINGS PANEL ------------
-
-/** DOM id of a quick settings tab button; pairs with `getQuickSettingsTabPanelId` for aria-controls / aria-labelledby. */
-export const getQuickSettingsTabId = (tab: QuickSettingsTab): string => `quick-settings-tab-${tab}`;
-
-/** DOM id of the tabpanel a quick settings tab controls; pairs with `getQuickSettingsTabId`. */
-export const getQuickSettingsTabPanelId = (tab: QuickSettingsTab): string => `quick-settings-tabpanel-${tab}`;
 
 //----------------- COLLAPSED TOOL ACTIVITY LABELS ------------
 /** Used by chat tool groups and expandable tool rows to describe an activity without exposing collapsed commands or file paths. Returns null for tools with their own specialized summaries. */

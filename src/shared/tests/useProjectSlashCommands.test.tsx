@@ -6,11 +6,10 @@ import { beforeEach, test, vi } from 'vitest';
 import type { Project } from '@/shared/types';
 
 /**
- * The composer's `/` menu and the quick settings Commands tab must offer the
- * same list, so both read it from this hook. It assembles the server's
- * built-in and custom commands with the provider's skills — each skill once,
- * however many plugin folders expose it — and reports loading and failure so a
- * list can tell "nothing yet" from "nothing" from "broken".
+ * The composer's `/` menu reads its list from this hook. It assembles the
+ * server's built-in and custom commands with the provider's skills — each skill
+ * once, however many plugin folders expose it — and reports loading and failure
+ * so a list can tell "nothing yet" from "nothing" from "broken".
  */
 
 const listCommands = vi.fn();

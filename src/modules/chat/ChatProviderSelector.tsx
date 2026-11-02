@@ -25,8 +25,8 @@ export default function ChatProviderSelector({ target, provider, canSwitch, onSe
   if (!target || !canSwitch) return null;
 
   return createPortal(
-    <label className="relative flex h-8 items-center gap-1.5 rounded-md border border-border/40 bg-muted/50 px-2 text-xs text-muted-foreground shadow-inner shadow-black/[0.025] transition-colors hover:bg-accent/60 dark:shadow-black/10">
-      <LLMProviderLogo provider={provider} className="pointer-events-none h-3.5 w-3.5 shrink-0" />
+    <label className="relative flex h-6 items-center gap-1.5 rounded-md border border-border/40 bg-muted/50 px-2 text-xs text-muted-foreground shadow-inner shadow-black/[0.025] transition-colors hover:bg-accent/60 dark:shadow-black/10">
+      <LLMProviderLogo provider={provider} className="pointer-events-none h-3 w-3 shrink-0" />
       <select
         aria-label={t('providerSelection.chooseProvider', { defaultValue: 'Choose AI provider' })}
         value={provider}
